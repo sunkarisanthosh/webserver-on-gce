@@ -1,0 +1,46 @@
+name: 'Terraform CI'
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell 
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install the latest version of Terraform CLI 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+
+    # Initialize
+    - name: Terraform Init
+      run: terraform init
+#       env:
+#         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+    # Generates an execution plan 
+    - name: Terraform Plan
+      run: terraform plan
+#       env:
+#         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve
+#       env:
+#         GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
